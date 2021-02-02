@@ -64,7 +64,6 @@
 # 直したい点
 - logファイルを時間を出力するようにしたい
 - blastnの実行に失敗しても、outputファイルが出力してしまうので直したい
-- 
 
 # 参考
 - [blantnのオプションについて](https://www.ncbi.nlm.nih.gov/books/NBK279684/)
