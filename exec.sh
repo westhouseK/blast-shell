@@ -71,6 +71,7 @@ done
 # 出力先のファイルをフォーマット
 # ex. 2021-1-31_12:34 (実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock)
 DATE=$(date '+%Y-%m-%d_%H:%M')
+# ファイル名を作成するためにMAX値を取得する
 COUNT=$(find ./$OUTPUT_DIR -type f -not -name '.*' | wc -l | tr -d ' ')
 OUTPUT_NAME=$DATE'_output'$(expr $COUNT + 1)'.txt'
 
@@ -90,14 +91,19 @@ fi
 
 # blastnの実行
 echo "実行中です。そのままお待ちください。"
-# TODO: 出力を調整する
-BLAST=$(blastn -db $DB_DIR/$DB_NAME/$DB_NAME.fasta -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "7 sseqid evalue score bitscore length qseqid sseqid pident qseq sseq" -culling_limit "10") >> log.txt
+# FIXME: blastnコマンドの変更と連動したい
+echo "コマンド: blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt \"7 sseqid evalue score bitscore length qseqid pident qseq sseq\" -culling_limit \"15\""
+echo "を実行しました。"
+
+# TODO: logに日付を出力する
+# FIXME: -outfmtの指定の仕方がよくわからない！
+blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "7 sseqid evalue score bitscore length qseqid pident qseq sseq" -culling_limit "15" 2>> log.txt
 
 # blastが失敗した時、エラー
 if [ $? -gt 0 ]; then
-    echo "blastの実行に失敗しました。"
+    echo "blastnの実行に失敗しました。"
+    exit 1
 fi
 
 # コマンド実行成功！
-# echo "コマンド: blastn -db $DB_DIR/$DB_NAME/$DB_NAME.fasta -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "7 sseqid evalue score bitscore length qseqid sseqid pident qseq sseq" -culling_limit "10""
-echo "を実行し、スクリプトを終了しました。"
+echo "blastnの実行に成功しました！"
