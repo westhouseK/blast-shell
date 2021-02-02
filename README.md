@@ -54,6 +54,7 @@
 
 # 仕様
 - YYYY-MM-DD_HH:SS_output〇〇.txtのフォーマットで出力される
+  - 日時は実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock
 - blastnに失敗した場合、log.txtに追記されていく
 
 # 困っている点
@@ -61,8 +62,9 @@
 - blastnオプション「-culling_limit」が、純粋に件数表示の挙動をしないっぽい？？
 
 # 直したい点
-- logファイルを出力するようにしたい
-- blastnの実行に失敗しても、outputファイルが出力してしまう
+- logファイルを時間を出力するようにしたい
+- blastnの実行に失敗しても、outputファイルが出力してしまうので直したい
+- 
 
 # 参考
 - [blantnのオプションについて](https://www.ncbi.nlm.nih.gov/books/NBK279684/)
