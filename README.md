@@ -5,13 +5,13 @@
 - 2021/01/31 v1.0.0
 
 ## 実行環境
-- shまたはbash
+- bash
 - blast
 がインストールされていること
 
 # 使用方法
 ## 手順
-1. `sh setup.sh`を実行する
+1. `bash setup.sh`を実行する
 1. db,output,queryディレクトリが作成される
 1. `cd db`でディレクトリに移動する
 1. `mkdir <DBを保存するディレクトリ名>` でディレクトリを作成する
@@ -19,7 +19,7 @@
 1. `cd <DBを保存するディレクトリ名>`
 1. `makeblastdb -in <保存したfastaファイル>.fasta -out <DBを保存するディレクトリ> -dbtype nucl -parse_seqids`を実行する
 1. `cd ../../`を行う
-1. `sh exec.sh`を実行する
+1. `bash exec.sh`を実行する
 
 # 実行後のディレクトリ構成例
 ```bash
