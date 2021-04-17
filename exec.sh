@@ -12,6 +12,7 @@
 DB_DIR="db"
 QUERY_DIR="query"
 OUTPUT_DIR="output"
+LOG_FILE="error.log"
 
 # TODO: ログファイルを出力する
 
@@ -89,15 +90,18 @@ if [ ! $input = 'y' ]; then
     exit 1
 fi
 
+OUTPUT_FORMAT="7 sseqid evalue score bitscore length qseqid pident qseq sseq"
+NUM_ALIGN_OPTION="-num_alignments"
+NUM_ALIGN_OPTION_NUM="1"
+
 # blastnの実行
 echo "実行中です。そのままお待ちください。"
-# FIXME: blastnコマンドの変更と連動したい
-echo "コマンド: blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt \"7 sseqid evalue score bitscore length qseqid pident qseq sseq\" -culling_limit \"15\""
-echo "を実行しました。"
-
+ 
 # TODO: logに日付を出力する
-# FIXME: -outfmtの指定の仕方がよくわからない！
-blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "7 sseqid evalue score bitscore length qseqid pident qseq sseq" -culling_limit "15" 2>> log.txt
+# echo "以下のコマンドを実行します。"
+# コマンドを出力するため
+set -x
+blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
 
 # blastが失敗した時、エラー
 if [ $? -gt 0 ]; then
