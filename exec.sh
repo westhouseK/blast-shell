@@ -115,8 +115,6 @@ fi
 
 # コマンド実行成功！
 echo "blastnの実行に成功しました！"
-echo "続いて、塩基配列の抽出を行います。"
-echo "少し時間がかかりますので、しばらくお待ちください。"
 
 # outputファイルから、sseqid(subject id)を抽出して、重複を取り除く
 REGEX="^(\#)"
@@ -130,6 +128,14 @@ do
     fi
 done < ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME
 
+if [ ! -e $DATE'_work.txt' ]; then
+  echo "blastnでヒットするものありませんでした。"
+  echo "処理を終了します。"
+  exit 1
+fi
+
+echo "続いて、塩基配列の抽出を行います。"
+echo "少し時間がかかりますので、しばらくお待ちください。"
 
 # MEMO: 重複を削除して、配列に変換する
 target_subject_ids=$(cat $DATE'_work.txt' | awk '!a[$0]++' | tr -s '\n' ' ')
@@ -145,4 +151,4 @@ done
 rm $DATE'_work.txt'
 
 echo "subject idと塩基配列の抽出に成功しました。"
-echo "これで処理を終了です。"
+echo "処理を終了します。"
