@@ -1,3 +1,13 @@
+# 追加！！！
+## 機能
+- outputファイルから、subject idを抽出し、その塩基配列の全長を出力
+- YYYY-MM-DD_HH:SS_sequence〇〇.txtで出力される
+
+# 注意
+- ディレクトリの構成を少し変えたので、`sh setup.sh`を再度実行する
+- ./db配下にDB名と同じ、生のfastaファイルを配置する必要がある
+> ex) ./db/hogehoge_gene.fasta/hogehoge_gene.fasta ← fastaの生ファイルを配置
+
 # 概要
 - blastnをローカル環境で実行するためのシェル
 
@@ -45,7 +55,10 @@
 ├── exec.sh
 ├── log.txt
 ├── output
-│   └── 2021-02-02_23:15_output1.txt
+│   ├── result
+│   │   └── 2021-04-18_17:22_output1.txt
+│   └── sequence
+│       └── 2021-04-18_17:22_sequence1.fasta
 ├── query
 │   └── 16s.fasta
 └── setup.sh
