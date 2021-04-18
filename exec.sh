@@ -75,13 +75,15 @@ DATE=$(date '+%Y-%m-%d_%H:%M')
 # ファイル名を作成するためにMAX値を取得する
 COUNT=$(find ./$OUTPUT_DIR -type f -not -name '.*' | wc -l | tr -d ' ')
 OUTPUT_NAME=$DATE'_output'$(expr $COUNT + 1)'.txt'
+ABSTRUCT_SEQUENCE=$DATE'_sequence'$(expr $COUNT + 1)'.fasta'
 
 # 最終確認
 echo "------------------------------------"
 echo "こちらで実行してもよろしいですか？ (y or Enter/n)"
 echo "データベース: $DB_NAME"
 echo "クエリ: $QUERY_NAME" 
-echo "出力ファイル名: $OUTPUT_NAME"
+echo "blast結果の出力ファイル名: $OUTPUT_NAME"
+echo "fastaファイルから抽出ファイル名: $ABSTRUCT_SEQUENCE"
 echo "------------------------------------"
 read input
 
@@ -100,7 +102,6 @@ echo "実行中です。そのままお待ちください。"
 # TODO: logに日付を出力する
 # echo "以下のコマンドを実行します。"
 # コマンドを出力するため
-set -x
 blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$OUTPUT_NAME -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
 
 # blastが失敗した時、エラー
@@ -111,3 +112,68 @@ fi
 
 # コマンド実行成功！
 echo "blastnの実行に成功しました！"
+echo "続いて、塩基配列の抽出を行います。"
+echo "少し時間がかかりますので、しばらくお待ちください。"
+
+# outputファイルから、sseqid(subject id)を抽出して、重複を取り除く
+REGEX="^(\#)"
+
+# subject_id(TRINITY_DN61_c0_g1とか??)の配列
+target_subject_ids=()
+while read output_line
+do
+    if [[ !($output_line =~ $REGEX) ]]; then
+        subject_id=$(echo $output_line | sed -e 's/[ ].*$//')
+        # MEMO: 配列よりファイル出力の方がいい??
+        # echo $output_line | sed -e 's/[ ].*$//' >> ./_tmp_output.txt
+        # subject_idを配列に詰める
+        target_subject_ids+=($subject_id)
+    fi
+done < ./$OUTPUT_DIR/$OUTPUT_NAME
+# echo ${subject_id_list[@]} # デバッグ用
+
+
+# MEMO: 【wip】重複を削除
+# awk '!a[$0]++' tmp1.txt >> .tmp2.txt
+# arr=$(cat .tmp2.txt | tr -s '\n' ' ')
+# echo ${arr[@]}
+
+
+# 塩基配列の列であるかのフラグ
+is_sequence_line=false
+
+# fastaを読み込む
+for target_subject_id in ${target_subject_ids[@]}
+do
+    while read fasta
+    do
+
+        # 塩基配列の列か判定する
+        if "${is_sequence_line}"; then
+            echo $fasta >> ./$OUTPUT_DIR/$ABSTRUCT_SEQUENCE
+            # 次のループは塩基配列の情報ではないので、フラグを折る
+            is_sequence_line=false
+            continue
+        fi
+
+        # 先頭に「>」である列がsubject_idのみを判定し、処理速度を向上させる
+        if [ $(echo ${fasta:0:1}) != '>' ]; then
+            continue
+        fi
+
+        # MEMO: 先頭の「>」を取り除ける処理
+        # fasta_line=$(echo $fasta | sed -e 's/>//')
+
+        # 目的にsubject_idの列か判定する
+        echo $fasta | grep $target_subject_id > /dev/null
+
+        if [ $? -eq 0 ]; then
+            echo $fasta >> ./$OUTPUT_DIR/$ABSTRUCT_SEQUENCE
+            # 次のループは塩基配列の情報なので、フラグを立てる
+            is_sequence_line=true
+        fi
+    done < ./db/$DB_NAME/$DB_NAME
+done
+
+echo "subject idと塩基配列の抽出に成功しました。"
+echo "これで処理を終了しました。"
