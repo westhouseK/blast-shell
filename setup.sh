@@ -18,26 +18,41 @@ SEQUENCE_DIR="sequence"
 # DBディレクトリを作成する
 if [ ! -d $DB_DIR ]; then
     mkdir $DB_DIR
+    if [ $? -eq 0 ]; then
+        echo $DB_DIR"ディレクトリを作成しました。"
+    fi
 fi
 
 # queryディレクトリを作成する
 if [ ! -d "$QUERY_DIR" ]; then
     mkdir $QUERY_DIR
+    if [ $? -eq 0 ]; then
+        echo $QUERY_DIR"ディレクトリを作成しました。"
+    fi
 fi
 
 # outputディレクトリを作成する
 if [ ! -d "$OUTPUT_DIR" ]; then
     mkdir $OUTPUT_DIR
+    if [ $? -eq 0 ]; then
+        echo $DB_DIR"ディレクトリを作成しました。"
+    fi
 fi
 
 # output/resultディレクトリを作成する
-if [ ! -d "$OUTPUT_DIR/$RESULT" ]; then
-    mkdir $OUTPUT_DIR/$RESULT
+if [ ! -d "$OUTPUT_DIR/$RESULT_DIR" ]; then
+    mkdir $OUTPUT_DIR/$RESULT_DIR
+    if [ $? -eq 0 ]; then
+        echo $OUTPUT_DIR"/"$RESULT_DIR"ディレクトリを作成しました。"
+    fi
 fi
 
 # output/sequneceディレクトリを作成する
-if [ ! -d "$OUTPUT_DIR/$SEQUENCE" ]; then
-    mkdir $OUTPUT_DIR/$SEQUENCE
+if [ ! -d "$OUTPUT_DIR/$SEQUENCE_DIR" ]; then
+    mkdir $OUTPUT_DIR/$SEQUENCE_DIR
+    if [ $? -eq 0 ]; then
+        echo $OUTPUT_DIR"/"$SEQUENCE_DIR"ディレクトリを作成しました。"
+    fi
 fi
 
-echo "ディレクトリを作成しました。"
+echo "ディレクトリ作成を完了しました。"
