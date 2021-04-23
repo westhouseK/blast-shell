@@ -129,7 +129,7 @@ do
 done < ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME
 
 if [ ! -e $DATE'_work.txt' ]; then
-  echo "blastnでヒットするものありませんでした。"
+  echo "blastnでヒットするものがありませんでした。"
   echo "処理を終了します。"
   exit 1
 fi
