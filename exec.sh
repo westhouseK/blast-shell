@@ -116,19 +116,10 @@ fi
 # コマンド実行成功！
 echo "blastnの実行に成功しました！"
 
-# outputファイルから、sseqid(subject id)を抽出して、重複を取り除く
-REGEX="^(\#)"
+# 「#」がついていない行だけ抽出し、配列にしてから、重複を削除する
+target_subject_ids=$(cat ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME | grep -ve '#' | cut -f1 | awk '!a[$0]++' | tr -s '\n' ' ')
 
-# subject_id(TRINITY_DN61_c0_g1とか??)の配列
-while read output_line
-do
-    if [[ !($output_line =~ $REGEX) ]]; then
-        # subject_idを抽出して、一時ファイルに保存する
-        echo $output_line | sed -e 's/[ ].*$//' >> $DATE'_work.txt'  
-    fi
-done < ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME
-
-if [ ! -e $DATE'_work.txt' ]; then
+if [ -z ${target_subject_ids[@]} ]; then
   echo "blastnでヒットするものありませんでした。"
   echo "処理を終了します。"
   exit 1
@@ -137,18 +128,11 @@ fi
 echo "続いて、塩基配列の抽出を行います。"
 echo "少し時間がかかりますので、しばらくお待ちください。"
 
-# MEMO: 重複を削除して、配列に変換する
-target_subject_ids=$(cat $DATE'_work.txt' | awk '!a[$0]++' | tr -s '\n' ' ')
-# echo ${target_subject_ids[@]} # デバッグ用
-
 # fastaを読み込む
 for target_subject_id in ${target_subject_ids[@]}
 do
     cat ./db/$DB_NAME/$DB_NAME | grep $target_subject_id -A 1 >> ./$OUTPUT_DIR/$SEQUENCE_DIR/$ABSTRUCT_SEQUENCE
 done
 
-# 一時ファイルを削除する
-rm $DATE'_work.txt'
-
 echo "subject idと塩基配列の抽出に成功しました。"
-echo "処理を終了します。"
+echo "処理を終了します。"   
