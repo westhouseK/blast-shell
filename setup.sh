@@ -9,11 +9,11 @@
 # ------------------------------------------------
 
 # 定数を宣言
-DB_DIR="db"
-QUERY_DIR="query"
-OUTPUT_DIR="output"
-RESULT_DIR="result"
-SEQUENCE_DIR="sequence"
+readonly DB_DIR="db"
+readonly QUERY_DIR="query"
+readonly OUTPUT_DIR="output"
+readonly RESULT_DIR="result"
+readonly SEQUENCE_DIR="sequence"
 
 # DBディレクトリを作成する
 if [ ! -d $DB_DIR ]; then

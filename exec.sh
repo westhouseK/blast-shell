@@ -9,16 +9,22 @@
 # ------------------------------------------------
 
 # 定数を宣言
-DB_DIR="db"
-QUERY_DIR="query"
-OUTPUT_DIR="output"
-RESULT_DIR="result"
-SEQUENCE_DIR="sequence"
-LOG_FILE="error.log"
+# ファイル郡
+readonly DB_DIR="db"
+readonly QUERY_DIR="query"
+readonly OUTPUT_DIR="output"
+readonly RESULT_DIR="result"
+readonly SEQUENCE_DIR="sequence"
+readonly LOG_FILE="error.log"
+
+# blastのオプション
+readonly OUTPUT_FORMAT="7 sseqid evalue score bitscore length qseqid pident qseq sseq"
+readonly NUM_ALIGN_OPTION="-num_alignments"
+readonly NUM_ALIGN_OPTION_NUM="1"
 
 # TODO: ログファイルを出力する
 
-# 実行の確認を行う
+# 実行の確認を行う-------------------------------------------------------------------------
 echo "------------------------------------"
 echo "blastnを実行しますか？ (y or Enter/n)"
 echo "------------------------------------"
@@ -51,9 +57,9 @@ fi
 echo "------------------------------------"
 echo "データベースを選択してください。"
 echo "------------------------------------"
-select DB_NAME in $(ls ./$DB_DIR) exit
+select DB_NAME in $(ls ./$DB_DIR) "exit"
 do
-    if [ $DB_NAME = 'exit' ]; then
+    if [ $DB_NAME = "exit" ]; then
         echo "スクリプトを終了しました。"
         exit 1
     fi
@@ -61,32 +67,34 @@ do
 done
 
 echo "------------------------------------"
-echo "クエリを選択してください。"
+echo "クエリを選択してください。複数選択が可能です。"
+echo "Enterを押すと、再び選択肢が表示されます。"
+echo "次に進みたい場合は、「that's it」を選択してください。"
 echo "------------------------------------"
-select QUERY_NAME in $(ls ./$QUERY_DIR) exit
+query_names=()
+select QUERY_NAME in $(ls ./$QUERY_DIR) "that's it" "exit"
 do
-    if [ $QUERY_NAME = 'exit' ]; then
-        echo "スクリプトを終了しました。"
-        exit 1
-    fi
-    break
+    case $QUERY_NAME in 
+        "exit")
+            echo "スクリプトを終了しました。"
+            exit 1;;
+        "that's it")
+            if [ ${#query_names[@]} -eq 0 ]; then
+                echo "クエリを選択していないため、終了しました。"
+                exit 1
+            fi
+            echo "選択完了しました。"
+            break;;
+        *)
+            echo "続いて選択してください。"
+            query_names+=($QUERY_NAME);;
+    esac
 done
 
-# 出力先のファイルをフォーマット
-# ex. 2021-1-31_12:34 (実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock)
-DATE=$(date '+%Y-%m-%d_%H:%M')
-# ファイル名を作成するためにMAX値を取得する
-COUNT=$(find ./$OUTPUT_DIR/$RESULT_DIR -type f -not -name '.*' | wc -l | tr -d ' ')
-OUTPUT_NAME=$DATE'_output'$(expr $COUNT + 1)'.txt'
-ABSTRUCT_SEQUENCE=$DATE'_sequence'$(expr $COUNT + 1)'.fasta'
-
-# 最終確認
 echo "------------------------------------"
 echo "こちらで実行してもよろしいですか？ (y or Enter/n)"
-echo "データベース: $DB_NAME"
-echo "クエリ: $QUERY_NAME" 
-echo "blast結果の出力ファイル名: $OUTPUT_NAME"
-echo "fastaファイルから抽出ファイル名: $ABSTRUCT_SEQUENCE"
+echo "選択したデータベース: $DB_NAME"
+echo "選択したクエリ: $(echo ${query_names[@]} | sed -e 's/ /, /g')"
 echo "------------------------------------"
 read input
 
@@ -95,60 +103,51 @@ if [ ! $input = 'y' ]; then
     exit 1
 fi
 
-OUTPUT_FORMAT="7 sseqid evalue score bitscore length qseqid pident qseq sseq"
-NUM_ALIGN_OPTION="-num_alignments"
-NUM_ALIGN_OPTION_NUM="1"
+# blast-------------------------------------------------------------------------
+# 出力先のファイルをフォーマット
+# ex. 2021-1-31_12:34 (実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock)
+DATE=$(date '+%Y-%m-%d_%H:%M')
+# ファイル名を作成するためにMAX値を取得する
+FILE_COUNT=$(find ./$OUTPUT_DIR/$RESULT_DIR -type f -not -name '.*' | wc -l | tr -d ' ')
 
-# blastnの実行
-echo "実行中です。そのままお待ちください。"
- 
-# TODO: logに日付を出力する
-# echo "以下のコマンドを実行します。"
-# コマンドを出力するため
-blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$QUERY_NAME -out $OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
-
-# blastが失敗した時、エラー
-if [ $? -gt 0 ]; then
-    echo "blastnの実行に失敗しました。"
-    exit 1
-fi
-
-# コマンド実行成功！
-echo "blastnの実行に成功しました！"
-
-# outputファイルから、sseqid(subject id)を抽出して、重複を取り除く
-REGEX="^(\#)"
-
-# subject_id(TRINITY_DN61_c0_g1とか??)の配列
-while read output_line
+COUNT=1
+for query_name in ${query_names[@]}
 do
-    if [[ !($output_line =~ $REGEX) ]]; then
-        # subject_idを抽出して、一時ファイルに保存する
-        echo $output_line | sed -e 's/[ ].*$//' >> $DATE'_work.txt'  
+    # blastの実行-------------------------------------------------------------------------
+    OUTPUT_NAME=$DATE'_output'$(expr $FILE_COUNT + $COUNT)'.txt'
+    ABSTRUCT_SEQUENCE=$DATE'_sequence'$(expr $FILE_COUNT + $COUNT)'.fasta'
+    echo "blastnを実行しています。"
+    blastn -db $DB_DIR/$DB_NAME/$DB_NAME -query $QUERY_DIR/$query_name -out $OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
+
+    # blastが失敗した時、エラー
+    if [ $? -gt 0 ]; then
+        echo "blastnの実行に失敗しました。"
+        exit 1
     fi
-done < ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME
 
-if [ ! -e $DATE'_work.txt' ]; then
-  echo "blastnでヒットするものがありませんでした。"
-  echo "処理を終了します。"
-  exit 1
-fi
+    echo "blastnの実行に成功しました！"
+    echo "続いて、塩基配列の抽出を行います。"
 
-echo "続いて、塩基配列の抽出を行います。"
-echo "少し時間がかかりますので、しばらくお待ちください。"
 
-# MEMO: 重複を削除して、配列に変換する
-target_subject_ids=$(cat $DATE'_work.txt' | awk '!a[$0]++' | tr -s '\n' ' ')
-# echo ${target_subject_ids[@]} # デバッグ用
+    # 先頭に「#」がついていない行を抽出し、配列に整形したのち重複を削除する
+    # NOTE: BSD grepだと「-P」オプションがないため動かない。「grep -ve '#'」にする必要がある
+    unique_subject_ids=$(grep -P '^(?!#)' ./$OUTPUT_DIR/$RESULT_DIR/$OUTPUT_NAME | cut -f1 | awk '!a[$0]++' | tr -s '\n' ' ')
 
-# fastaを読み込む
-for target_subject_id in ${target_subject_ids[@]}
-do
-    cat ./db/$DB_NAME/$DB_NAME | grep $target_subject_id -A 1 >> ./$OUTPUT_DIR/$SEQUENCE_DIR/$ABSTRUCT_SEQUENCE
+    # 空か判定する
+    if [ -z $unique_subject_ids ]; then
+        echo "blastnでヒットするものありませんでした。"
+        continue
+    fi
+
+    # ファイルの抽出-------------------------------------------------------------------------
+    # fastaを読み込む
+    for subject_id in ${unique_subject_ids[@]}
+    do
+        cat ./db/$DB_NAME/$DB_NAME | grep $subject_id -A 1 >> ./$OUTPUT_DIR/$SEQUENCE_DIR/$ABSTRUCT_SEQUENCE
+    done
+
+    echo "subject idと塩基配列の抽出に成功しました。"
+    let COUNT++ # ループするためにインクリメントする
 done
 
-# 一時ファイルを削除する
-rm $DATE'_work.txt'
-
-echo "subject idと塩基配列の抽出に成功しました。"
-echo "処理を終了します。"
+echo "すべての処理を終了しました。"   
