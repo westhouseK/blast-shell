@@ -1,18 +1,11 @@
-# 追加！！！
-## 機能
-- outputファイルから、subject idを抽出し、その塩基配列の全長を出力
-- YYYY-MM-DD_HH:SS_sequence〇〇.txtで出力される
-
-# 注意
-- ディレクトリの構成を少し変えたので、`sh setup.sh`を再度実行する
-- ./db配下にDB名と同じ、生のfastaファイルを配置する必要がある
-> ex) ./db/hogehoge_gene.fasta/hogehoge_gene.fasta ← fastaの生ファイルを配置
-
 # 概要
 - blastnをローカル環境で実行するためのシェル
+ - blastnの実行結果がresultに出力される
+ - blastnでヒットしたsubject idの塩基配列がsequenceに出力される
 
 ## バージョン
 - 2021/01/31 v1.0.0
+- 2021/05/16 v1.1.0
 
 ## 実行環境
 - bash
@@ -67,16 +60,18 @@
 
 # 仕様
 - YYYY-MM-DD_HH:SS_output〇〇.txtのフォーマットで出力される
-  - 日時は実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock
+  - 日時は実行するPCのタイムゾーンに依存する。確認方法: cat /etc/sysconfig/clock
+- blast1にヒットした場合、塩基配列の抽出ファイルがYYYY-MM-DD_HH:SS_sequence〇〇.fastaのフォーマットで出力される
+- ./db配下にDB名と同じ、生のfastaファイルを配置する必要がある
+> ex) ./db/hogehoge_gene.fasta/hogehoge_gene.fasta ← fastaの生ファイルを配置
 - blastnに失敗した場合、log.txtに追記されていく
+- クエリは複数選択することができる
 
 # 困っている点
-- blastnオプション「-outfmt」でどの項目を指定したらよいかわからない
-- blastnオプション「-culling_limit」が、純粋に件数表示の挙動をしないっぽい？？
+- blastnオプション「-culling_limit」の仕様がドキュメントを読んでもよくわからない
 
 # 直したい点
 - logファイルを時間を出力するようにしたい
-- blastnの実行に失敗しても、outputファイルが出力してしまうので直したい
 
 # 参考
 - [blantnのオプションについて](https://www.ncbi.nlm.nih.gov/books/NBK279684/)
