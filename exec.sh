@@ -135,7 +135,7 @@ do
 
     # 空か判定する
     if [ -z $unique_subject_ids ]; then
-        echo "blastnでヒットするものありませんでした。"
+        echo "blastnでヒットするものがありませんでした。"
         continue
     fi
 
