@@ -5,6 +5,7 @@
 # blastnを実行する
 # 実行方法: sh exec.sh
 # 実行条件: shまたはbashが、インストールされていること
+# 実行ログを残したい時: sh exec.sh > histoy.txt
 #
 # ------------------------------------------------
 
@@ -115,7 +116,7 @@ fi
 date=$(date '+%Y-%m-%d_%H:%M')
 # 結果出力ファイル名のシーケンスを行うために、MAX値+1を取得
 file_sequence_num=$(find ./$OUTPUT_DIR/$RESULT_DIR -type f -not -name '.*' | wc -l | tr -d ' ' | xargs -Imax expr max + 1)
-sequence=file_sequence_num
+sequence=$file_sequence_num
 
 for db_name in ${db_names[@]}
 do
@@ -124,7 +125,7 @@ do
     result_file_name="$(printf $RESULT_FILE_FORMAT $date $sequence)"
     sequence_file_name="$(printf $SEQUENCE_FILE_FORMAT $date $file_sequence_num)" # 一番若い番号に集約
     echo "blantnを実行中[クエリ($query_name) -> データベース($db_name)]"
-    blastn -db $DB_DIR/$db_name/$db_name.fasta -query $QUERY_DIR/$query_name -out $OUTPUT_DIR/$RESULT_DIR/$result_file_name -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
+    blastn -db $DB_DIR/$db_name/$db_name -query $QUERY_DIR/$query_name -out $OUTPUT_DIR/$RESULT_DIR/$result_file_name -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
 
     # blastが失敗した時、エラー
     if [ $? -gt 0 ]; then
@@ -153,7 +154,7 @@ do
     done
 
     echo "$(echo ${unique_subject_ids[@]} | sed -e 's/ /, /g')の${#unique_subject_ids[@]}件がヒットしました。"
-    expr sequence + 1 # ループするためにインクリメントする
+    let sequence++ # ループするためにインクリメントする
 done
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"

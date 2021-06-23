@@ -1,7 +1,7 @@
 # 概要
 - blastnをローカル環境で実行するためのシェル
- - blastnの実行結果がresultに出力される
- - blastnでヒットしたsubject idの塩基配列がsequenceに出力される
+ - blastnの実行結果が出力される
+ - blastnでヒットしたsubject idの塩基配列が出力される
 
 ## バージョン
 - 2021/01/31 v1.0.0
@@ -30,43 +30,45 @@
 .
 ├── README.md
 ├── db
-│   └── 16S_ribosomal_RNA ← ここの名前と配下のファイル名が同じでないといけない
-│       ├── 16S_ribosomal_RNA.ndb
-│       ├── 16S_ribosomal_RNA.nhr
-│       ├── 16S_ribosomal_RNA.nin
-│       ├── 16S_ribosomal_RNA.nnd
-│       ├── 16S_ribosomal_RNA.nni
-│       ├── 16S_ribosomal_RNA.nog
-│       ├── 16S_ribosomal_RNA.nos
-│       ├── 16S_ribosomal_RNA.not
-│       ├── 16S_ribosomal_RNA.nsq
-│       ├── 16S_ribosomal_RNA.ntf
-│       ├── 16S_ribosomal_RNA.nto
-│       ├── 16S_ribosomal_RNA.tar.gz
-│       ├── 16S_ribosomal_RNA.tar.gz.md5
-│       ├── taxdb.btd
-│       └── taxdb.bti
-├── exec.sh
-├── log.txt
+│   └── xxx
+│       ├── xxx.fasta
+│       ├── xxx.nhr
+│       ├── xxx.nin
+│       ├── xxx.nog
+│       ├── xxx.nsd
+│       ├── xxx.nsi
+│       └── xxx.nsq
+├── error.log
+├── exec.sh // メインのシェルスクリプト
 ├── output
 │   ├── result
-│   │   └── 2021-04-18_17:22_output1.txt
+│   │   ├── 2021-06-24_00:34_output1.txt
+│   │   ├── 2021-06-24_00:34_output2.txt
+│   │   ├── 2021-06-24_00:34_output3.txt
+│   │   └── 2021-06-24_00:34_output4.txt
 │   └── sequence
-│       └── 2021-04-18_17:22_sequence1.fasta
+│       └── 2021-06-24_00:34_sequence1.fasta // outputの一番若い番号になる
+│       
 ├── query
-│   └── 16s.fasta
-└── setup.sh
+│   └── query.txt
+├── setup.sh
+└── test.sh
 
 ```
 
-# 仕様
-- YYYY-MM-DD_HH:SS_output〇〇.txtのフォーマットで出力される
-  - 日時は実行するPCのタイムゾーンに依存する。確認方法: cat /etc/sysconfig/clock
-- blast1にヒットした場合、塩基配列の抽出ファイルがYYYY-MM-DD_HH:SS_sequence〇〇.fastaのフォーマットで出力される
-- ./db配下にDB名と同じ、生のfastaファイルを配置する必要がある
-> ex) ./db/hogehoge_gene.fasta/hogehoge_gene.fasta ← fastaの生ファイルを配置
-- blastnに失敗した場合、log.txtに追記されていく
-- クエリは複数選択することができる
+# シェルについて
+## 仕様
+- dbは複数選択することができる
+- blastnに失敗した場合、error.logに追記されていく
+
+## 出力フォーマット
+- 結果 -> YYYY-MM-DD_HH:SS_output〇〇.txt
+- 配列 -> YYYY-MM-DD_HH:SS_sequence〇〇.fasta
+
+## 注意点
+- 日時は実行するPCのタイムゾーンに依存する。確認方法: cat /etc/sysconfig/clock
+- ./db配下に「db名.fasta」ファイルを配置する必要がある
+> ex) ./db/hoge/hogehoge.fasta ← DB作成に使ったfastaファイルを配置
 
 # 困っている点
 - blastnオプション「-culling_limit」の仕様がドキュメントを読んでもよくわからない
