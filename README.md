@@ -1,7 +1,7 @@
 # 概要
 - blastnをローカル環境で実行するためのシェル
- - blastnの実行結果が出力される
- - blastnでヒットしたsubject idの塩基配列が出力される
+  - blastnの実行結果が出力される
+  - blastnでヒットしたsubject idの塩基配列が出力される
 
 ## バージョン
 - 2021/01/31 v1.0.0
@@ -39,7 +39,7 @@
 │       ├── xxx.nsi
 │       └── xxx.nsq
 ├── error.log
-├── exec.sh // メインのシェルスクリプト
+├── exec.sh // blastを実行するshell
 ├── output
 │   ├── result
 │   │   ├── 2021-06-24_00:34_output1.txt
@@ -51,8 +51,8 @@
 │       
 ├── query
 │   └── query.txt
-├── setup.sh
-└── test.sh
+├── setup.sh // ディレクトリを作るshell
+└── test.sh // test用のshell
 
 ```
 
