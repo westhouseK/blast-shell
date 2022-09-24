@@ -2,7 +2,7 @@
 
 # ------------------------------------------------
 # 
-# blastnを実行する
+# blastを実行する
 # 実行方法: sh exec.sh
 # 実行条件: shまたはbashが、インストールされていること
 # 実行ログを残したい時: sh exec.sh > histoy.txt
@@ -34,9 +34,9 @@ readonly RESULT_FILE_FORMAT="%s_output%s.txt"
 readonly SEQUENCE_FILE_FORMAT="%s_sequence%s.fasta"
 readonly ABSTRUCTED_FASTA_FILE_FORMAT="%s.fasta"
 
-# 事前チェック-------------------------------------------------------------------------
+# 事前チェック-------------------------------------------------------------------------
 echo "-----------------------------------------"
-echo "blastnを実行しますか？ (y or Enter/n)"
+echo "blastを実行しますか？ (y or Enter/n)"
 echo "-----------------------------------------"
 read input
 
@@ -52,7 +52,20 @@ if [ ! -d $DB_DIR -o ! -d $QUERY_DIR -o ! -d $OUTPUT_DIR -o ! -d $OUTPUT_DIR/$RE
     exit 1
 fi
 
-# 選択-------------------------------------------------------------------------
+# 選択-------------------------------------------------------------------------
+echo "-----------------------------------------"
+echo "blastを選択してください。"
+echo " [$EXIT] -> 終了"
+echo "-----------------------------------------"
+select blast in 'blastn' 'blastx' $EXIT 
+do
+    if [ $blast = $EXIT ]; then
+        echo "スクリプトを終了しました。"
+        exit 1
+    fi
+    break
+done
+
 echo "-----------------------------------------"
 echo "クエリを選択してください。"
 echo " [$EXIT] -> 終了"
@@ -100,6 +113,7 @@ done
 
 echo "-----------------------------------------"
 echo "以下の条件で実行してもよろしいですか？ (y or Enter/n)"
+echo "選択したblast: $blast"
 echo "選択したクエリ: $query_name"
 echo "選択したデータベース: $(echo ${db_names[@]} | sed -e 's/ /, /g')"
 echo "-----------------------------------------"
@@ -110,7 +124,7 @@ if [ ! $input = 'y' ]; then
     exit 1
 fi
 
-# メインの処理(blastn)-------------------------------------------------------------------------
+# メインの処理(blast)-------------------------------------------------------------------------
 # 出力先のファイルをフォーマット
 # NOTE: 2021-1-31_12:34 (実行するPCのタイムゾーンに依存。確認方法: cat /etc/sysconfig/clock)
 date=$(date '+%Y-%m-%d_%H:%M')
@@ -120,20 +134,20 @@ sequence=$file_sequence_num
 
 for db_name in ${db_names[@]}
 do
-    # blastnの実行-------------------------------------------------------------------------
+    # blastの実行-------------------------------------------------------------------------
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     result_file_name="$(printf $RESULT_FILE_FORMAT $date $sequence)"
     sequence_file_name="$(printf $SEQUENCE_FILE_FORMAT $date $file_sequence_num)" # 一番若い番号に集約
-    echo "blantnを実行中[クエリ($query_name) -> データベース($db_name)]"
-    blastn -db $DB_DIR/$db_name/$db_name -query $QUERY_DIR/$query_name -out $OUTPUT_DIR/$RESULT_DIR/$result_file_name -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
+    echo "<$blast>を実行中[クエリ($query_name) -> データベース($db_name)]"
+    $blast -db $DB_DIR/$db_name/$db_name -query $QUERY_DIR/$query_name -out $OUTPUT_DIR/$RESULT_DIR/$result_file_name -outfmt "$OUTPUT_FORMAT" $NUM_ALIGN_OPTION "$NUM_ALIGN_OPTION_NUM" 2>> $LOG_FILE
 
     # blastが失敗した時、エラー
     if [ $? -gt 0 ]; then
-        echo "blastnの実行に失敗しました。"
+        echo "blastの実行に失敗しました。"
         exit 1
     fi
 
-    echo "blastnの実行に成功しました！"
+    echo "blastの実行に成功しました！"
 
     # 先頭に「#」がついていない行を抽出し、配列に整形したのち重複を削除する
     # NOTE: BSD grepだと「-P」オプションがないため動かない。「grep -ve '#'」にする必要がある
@@ -141,7 +155,7 @@ do
 
     # 空か判定する
     if [ -z $unique_subject_ids ]; then
-        echo "blastnでヒットするものがありませんでした。"
+        echo "blastでヒットするものがありませんでした。"
         continue
     fi
 
