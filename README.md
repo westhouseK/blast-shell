@@ -23,7 +23,7 @@
 1. 作成したディレクトリの中に、DB用fastaファイルを保存する
 1. `cd <DBを保存するディレクトリ名>`
 1. 核酸の場合→`makeblastdb -in <保存したfastaファイル>.fasta -out <DBを保存するディレクトリ> -dbtype nucl -parse_seqids`を実行する
-1. タンパク質の場合→`makeblastdb -in <保存したfastaファイル>.fasta -out <DBを保存するディレクトリ> -dbtype prot -parse_seqids`を実行する
+1. タンパク質の場合→`makeblastdb -in <保存したfastaファイル>.faa -out <DBを保存するディレクトリ> -dbtype prot -parse_seqids`を実行する
 1. `cd ../../`を行う
 1. `bash exec.sh`を実行する
 
