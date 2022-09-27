@@ -168,7 +168,7 @@ do
         if [ $blast = 'blastx' ]; then
             tmp_subject_id=$subject_id
             subject_id=$(echo "$subject_id" | cut -d '_' -f 1-4)
-            echo "タンパク質の検索のため、文字列を加工してから検索[$tmp_subject_id->$subject_id]"
+            echo "blastnの実行結果から塩基配列ファイルに検索をかけるため、文字列を加工する[$tmp_subject_id->$subject_id]"
         fi 
         cat ./db/$db_name/"$(printf $ABSTRUCTED_FASTA_FILE_FORMAT $db_name)" | grep $subject_id -A 1 >> ./$OUTPUT_DIR/$SEQUENCE_DIR/$sequence_file_name
     done
